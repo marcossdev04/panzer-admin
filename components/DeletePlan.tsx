@@ -8,25 +8,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
-import { Clients } from '@/types/Clients'
 import { useState } from 'react'
 import { api } from '@/api/api'
 import { queryClient } from '@/api/QueryClient'
 import { toast } from 'react-toastify'
 import { Loader } from './Loader'
+import { Plan } from '@/types/Plans'
 
 interface Props {
-  client: Clients | undefined
+  plan: Plan | undefined
 }
-export function DeleteUserAdmin({ client }: Props) {
+export function DeletePlan({ plan }: Props) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
-  async function handleDeleteClient() {
+  async function handleDeletePlan() {
     try {
       setLoading(true)
-      await api.delete(`/api/users/${client?.id}`)
-      await queryClient.refetchQueries(['getClients'])
-      toast.success('Cliente deletado com sucesso!', {
+      await api.delete(`/api/backoffice/plans/${plan?.id}/`)
+      await queryClient.refetchQueries(['getPlans'])
+      toast.success('Plano deletado com sucesso!', {
         position: 'bottom-right',
         closeOnClick: true,
         theme: 'dark',
@@ -34,10 +34,10 @@ export function DeleteUserAdmin({ client }: Props) {
       setOpen(false)
       setLoading(false)
     } catch (err) {
-      toast.error('Erro ao deletar este usuário', {
+      toast.error('Erro ao deletar o plano', {
         position: 'bottom-right',
-        theme: 'dark',
         closeOnClick: true,
+        theme: 'dark',
       })
       setOpen(false)
       setLoading(false)
@@ -50,21 +50,20 @@ export function DeleteUserAdmin({ client }: Props) {
         setOpen(!open)
       }}
     >
-      <DialogTrigger className="w-full">
+      <DialogTrigger className="">
         <Button
-          className="flex w-full items-center justify-between px-2"
-          variant="ghost"
+          size={'icon'}
+          className="rounded-full bg-transparent p-6 text-[#d03131] transition-colors duration-300 hover:bg-[#a40c0c] hover:text-black"
         >
-          <div>Deletar</div>
           <div>
-            <Trash2 size={18} />
+            <Trash2 size={30} strokeWidth={2} />
           </div>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[500px] mobile:max-w-[350px] mobile:rounded-xl tablet:rounded-2xl laptop:rounded-2xl desktop:rounded-2xl ">
-        <DialogTitle className="text-lime">Deletar Usuário</DialogTitle>
+        <DialogTitle className="text-lime">Deletar Plano</DialogTitle>
         <DialogDescription>
-          Você realmente deseja deletar este usuário?
+          Você realmente deseja deletar este plano?
         </DialogDescription>
         <div className="flex justify-end gap-2">
           <DialogClose>
@@ -88,7 +87,7 @@ export function DeleteUserAdmin({ client }: Props) {
             <Button
               className="flex items-center gap-1 rounded-xl px-3"
               variant={'destructive'}
-              onClick={handleDeleteClient}
+              onClick={handleDeletePlan}
             >
               <div>Deletar</div>
               <Trash2 size={18} strokeWidth={2.5} />

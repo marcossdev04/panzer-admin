@@ -7,67 +7,27 @@ import {
   PaginationLink,
   PaginationNext,
 } from '@/components/ui/pagination'
-import { ClientTable } from '@/components/tables/ClientTable'
 import { api } from '@/api/api'
 import { useQuery } from 'react-query'
-import { Clients } from '@/types/Clients'
-import { useCallback, useMemo, useState } from 'react'
+import { UsersTable } from '@/components/tables/UsersTable'
+import { useState } from 'react'
+import { Staff } from '@/types/Staff'
 
-export default function ClientAdmin() {
+export default function Users() {
   const [page, setPage] = useState(1)
-  const [filter, setFilter] = useState<{
-    name: string
-    email: string
-    cpf: string
-  }>({
-    name: '',
-    email: '',
-    cpf: '',
-  })
 
-  const handleNameChange = useCallback(
-    (filter: { name: string; email: string; cpf: string }) => {
-      setFilter(filter)
-    },
-    [],
-  )
-
-  const formattedUrl = useMemo(() => {
-    const params = new URLSearchParams()
-
-    if (filter.name) {
-      params.append('name', filter.name)
-    }
-    if (filter.email) {
-      params.append('email', filter.email)
-    }
-    if (filter.cpf) {
-      params.append('cpf', filter.cpf)
-    }
-    params.append('page', String(page))
-
-    return `?${params.toString()}`
-  }, [filter, page])
-
-  async function fetchClients() {
-    const response = await api.get(`/api/backoffice/users/${formattedUrl}`)
-    return response.data.results
+  async function fetchStaffs() {
+    const response = await api.get(`/api/backoffice/staffs/`)
+    return response.data
   }
-  const { data, isLoading } = useQuery<Clients[]>(
-    ['getClients', formattedUrl],
-    fetchClients,
-  )
+  const { data, isLoading } = useQuery<Staff[]>(['getStaffs'], fetchStaffs)
 
   function handlePreviewsPage() {
     page > 1 ? setPage(page - 1) : setPage(page)
   }
   return (
     <>
-      <ClientTable
-        onChangeFilter={handleNameChange}
-        isLoading={isLoading}
-        clients={data}
-      />
+      <UsersTable isLoading={isLoading} staffs={data} />
       {data && data.length >= 50 ? (
         <Pagination>
           <PaginationContent className="cursor-pointer">
@@ -81,7 +41,9 @@ export default function ClientAdmin() {
               >
                 <PaginationLink href="#">{page - 1}</PaginationLink>
               </PaginationItem>
-            ) : null}
+            ) : (
+              ''
+            )}
             <PaginationItem className="cursor-pointer">
               <PaginationLink href="#" isActive>
                 {page}

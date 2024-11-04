@@ -57,7 +57,6 @@ export function ClientDetails({ client }: Props) {
       setOpen(false)
     } catch (err) {
       setLoading(false)
-      console.log(err)
       toast.error('Não foi possivel deletar este contrato', {
         position: 'bottom-right',
         theme: 'dark',
@@ -80,6 +79,7 @@ export function ClientDetails({ client }: Props) {
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[800px] mobile:max-w-[350px] mobile:rounded-xl tablet:rounded-2xl laptop:rounded-2xl desktop:rounded-2xl ">
+        <DialogTitle className="hidden">t</DialogTitle>
         <div className="flex py-5 mobile:flex-col mobile:py-0">
           <div className="mx-5 w-1/3 mobile:mx-0 mobile:w-full">
             <div className="pb-3">

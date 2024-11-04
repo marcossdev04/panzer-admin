@@ -51,6 +51,22 @@ export function Header() {
         >
           Logs
         </Link>
+        <Link
+          href="/admin/users"
+          className={`${
+            pathname === '/admin/users' ? 'text-lime' : 'text-muted-foreground'
+          } transition-colors  hover:text-lime`}
+        >
+          Funcionários
+        </Link>
+        <Link
+          href="/admin/plans"
+          className={`${
+            pathname === '/admin/plans' ? 'text-lime' : 'text-muted-foreground'
+          } transition-colors  hover:text-lime`}
+        >
+          Planos
+        </Link>
       </nav>
       <Sheet>
         <SheetTrigger asChild>
@@ -93,6 +109,26 @@ export function Header() {
               } transition-colors  hover:text-lime`}
             >
               Logs
+            </Link>
+            <Link
+              href="/admin/users"
+              className={`${
+                pathname === '/admin/users'
+                  ? 'text-lime'
+                  : 'text-muted-foreground'
+              } transition-colors  hover:text-lime`}
+            >
+              Funcionários
+            </Link>
+            <Link
+              href="/admin/plans"
+              className={`${
+                pathname === '/admin/plans'
+                  ? 'text-lime'
+                  : 'text-muted-foreground'
+              } transition-colors  hover:text-lime`}
+            >
+              Planos
             </Link>
           </nav>
         </SheetContent>

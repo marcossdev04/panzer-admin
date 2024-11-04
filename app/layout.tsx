@@ -1,6 +1,5 @@
 'use client'
-
-import { useEffect } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 // eslint-disable-next-line camelcase
@@ -19,21 +18,50 @@ const bai = Bai_Jamjuree({
   subsets: ['latin'],
 })
 
+interface AuthWrapperProps {
+  children: ReactNode
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   const cookies = new Cookies()
-  const token = cookies.get('token:panzer-admin')
   const pathname = usePathname()
-  const router = useRouter()
 
-  useEffect(() => {
-    if (!token && pathname !== '/admin') {
-      router.push('/admin')
+  function AuthWrapper({ children }: AuthWrapperProps) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const isAuthPage = pathname === '/admin'
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+
+    useEffect(() => {
+      const token = cookies.get('token_panzer_admin')
+      setIsAuthenticated(!!token)
+
+      if (!token && !isAuthPage) {
+        router.replace('/admin')
+      }
+    }, [router, isAuthPage])
+
+    if (isAuthenticated === null) {
+      return null
     }
-  }, [token, pathname, router])
+
+    if (!isAuthenticated && !isAuthPage) {
+      return null
+    }
+
+    if (isAuthenticated && isAuthPage) {
+      router.replace('/admin/home')
+      return null
+    }
+
+    return <>{children}</>
+  }
+
+  const hideNavigationBar = pathname === '/admin'
 
   return (
     <html lang="en">
@@ -46,12 +74,14 @@ export default function RootLayout({
         >
           <QueryClientProvider client={queryClient}>
             <AuthContextProvider>
-              {pathname === '/admin' ? '' : <Header />}
-              {children}
+              <AuthWrapper>
+                {!hideNavigationBar && <Header />}
+                {children}
+                <ToastContainer />
+              </AuthWrapper>
             </AuthContextProvider>
           </QueryClientProvider>
         </ThemeProvider>
-        <ToastContainer />
       </body>
     </html>
   )

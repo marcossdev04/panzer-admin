@@ -8,39 +8,39 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
-import { Clients } from '@/types/Clients'
 import { useState } from 'react'
 import { api } from '@/api/api'
 import { queryClient } from '@/api/QueryClient'
 import { toast } from 'react-toastify'
 import { Loader } from './Loader'
+import { Staff } from '@/types/Staff'
 
 interface Props {
-  client: Clients | undefined
+  staff: Staff | undefined
 }
-export function DeleteUserAdmin({ client }: Props) {
+export function DeleteStaff({ staff }: Props) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   async function handleDeleteClient() {
     try {
       setLoading(true)
-      await api.delete(`/api/users/${client?.id}`)
-      await queryClient.refetchQueries(['getClients'])
-      toast.success('Cliente deletado com sucesso!', {
+      await api.delete(`/api/users/${staff?.id}`)
+      await queryClient.refetchQueries(['getStaffs'])
+      toast.success('Funcionário deletado com sucesso!', {
         position: 'bottom-right',
         closeOnClick: true,
         theme: 'dark',
       })
       setOpen(false)
       setLoading(false)
-    } catch (err) {
-      toast.error('Erro ao deletar este usuário', {
-        position: 'bottom-right',
-        theme: 'dark',
-        closeOnClick: true,
-      })
-      setOpen(false)
+    } catch {
       setLoading(false)
+      setOpen(false)
+      toast.error('Erro ao deletar o funcionário!', {
+        position: 'bottom-right',
+        closeOnClick: true,
+        theme: 'dark',
+      })
     }
   }
   return (
@@ -52,19 +52,19 @@ export function DeleteUserAdmin({ client }: Props) {
     >
       <DialogTrigger className="w-full">
         <Button
-          className="flex w-full items-center justify-between px-2"
+          className="flex w-80 items-center justify-between px-2"
           variant="ghost"
         >
-          <div>Deletar</div>
+          <div>Alterar usuário</div>
           <div>
             <Trash2 size={18} />
           </div>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[500px] mobile:max-w-[350px] mobile:rounded-xl tablet:rounded-2xl laptop:rounded-2xl desktop:rounded-2xl ">
-        <DialogTitle className="text-lime">Deletar Usuário</DialogTitle>
+        <DialogTitle className="text-lime">Deletar Fucionário</DialogTitle>
         <DialogDescription>
-          Você realmente deseja deletar este usuário?
+          Você realmente deseja deletar este funcionário?
         </DialogDescription>
         <div className="flex justify-end gap-2">
           <DialogClose>

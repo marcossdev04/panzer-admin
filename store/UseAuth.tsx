@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from '@/api/api'
 import { useRouter } from 'next/navigation'
 import { CookiesProvider, useCookies } from 'react-cookie'
@@ -22,6 +24,7 @@ interface AuthContextProps {
   errorSignIn: string | null
   handleClearErrorSignIn: () => void
   isAuthenticated: boolean
+  refreshToken: () => Promise<void>
 }
 
 export const AuthContext = createContext({} as AuthContextProps)
@@ -32,23 +35,25 @@ interface AuthContextProviderProps {
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const { push } = useRouter()
-  const [cookies, setCookie, removeCookie] = useCookies(['token:panzer-admin'])
+  const [cookies, setCookie, removeCookie] = useCookies([
+    'token_panzer_admin',
+    'refresh_panzer_admin',
+  ])
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    !!cookies['token:panzer-admin'],
+    !!cookies.token_panzer_admin,
   )
 
   useEffect(() => {
     const handleCookieChange = () => {
-      if (!cookies['token:panzer-admin']) {
+      if (!cookies.token_panzer_admin) {
         setIsAuthenticated(false)
         api.defaults.headers.Authorization = ''
-        push('/admin')
       } else {
         setIsAuthenticated(true)
-        api.defaults.headers.Authorization = `Bearer ${cookies['token:panzer-admin']}`
+        api.defaults.headers.Authorization = `Bearer ${cookies.token_panzer_admin}`
       }
     }
     handleCookieChange()
@@ -57,6 +62,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
     return () => clearInterval(interval)
   }, [cookies, push])
+
   async function handleSignIn({ email, password }: SignInCredentials) {
     setIsLoading(true)
     try {
@@ -64,35 +70,60 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         email,
         password,
       })
-      const tokenn = response.data.access
-      setCookie('token:panzer-admin', tokenn, { maxAge: 60 * 30 })
+      const accessToken = response.data.access
+      const refreshToken = response.data.refresh
+      setCookie('token_panzer_admin', accessToken, { maxAge: 60 * 60 })
+      setCookie('refresh_panzer_admin', refreshToken, {
+        maxAge: 60 * 60 * 24,
+      })
 
-      api.defaults.headers.Authorization = `Bearer ${tokenn}`
+      api.defaults.headers.Authorization = `Bearer ${accessToken}`
       setIsAuthenticated(true)
       push('/admin/home')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      err.response.status === 401
-        ? toast.error(err.response.data.detail, {
-            position: 'bottom-right',
-            theme: 'dark',
-            closeOnClick: true,
-          })
-        : toast.error('Ocorreu um erro inesperado com a API', {
-            position: 'bottom-right',
-            theme: 'dark',
-            closeOnClick: true,
-          })
+      toast.error(
+        err.response.data.error === 'Wrong password'
+          ? 'Email ou senha incorreta'
+          : err.response.data.error === 'The user is already logged in'
+            ? 'Você já está logado'
+            : 'Erro desconhecido',
+        {
+          position: 'bottom-right',
+          theme: 'dark',
+          closeOnClick: true,
+        },
+      )
     } finally {
       setIsLoading(false)
     }
   }
 
   async function handleSignOut() {
-    removeCookie('token:panzer-admin', { path: '/' })
+    removeCookie('token_panzer_admin')
+    removeCookie('refresh_panzer_admin')
     api.defaults.headers.Authorization = ''
-    setIsAuthenticated(false)
     push('/admin')
+    setIsAuthenticated(false)
+  }
+
+  async function refreshToken() {
+    try {
+      const refreshToken = cookies.refresh_panzer_admin
+      if (!refreshToken) {
+        throw new Error('No refresh token available')
+      }
+
+      const response = await api.post('/api/token/refresh/', {
+        refresh: refreshToken,
+      })
+      const newAccessToken = response.data.access
+      setCookie('token_panzer_admin', newAccessToken, { maxAge: 60 * 60 })
+      api.defaults.headers.Authorization = `Bearer ${newAccessToken}`
+      setIsAuthenticated(true)
+    } catch (err: any) {
+      console.error('Failed to refresh token:', err)
+      handleSignOut()
+    }
   }
 
   function handleClearErrorSignIn() {
@@ -108,6 +139,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         errorSignIn: error ? String(error) : null,
         handleClearErrorSignIn,
         isAuthenticated,
+        refreshToken,
       }}
     >
       <CookiesProvider>{children}</CookiesProvider>

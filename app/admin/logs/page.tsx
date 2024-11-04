@@ -89,31 +89,33 @@ export default function Logs() {
         isLoading={isLoading}
         logs={data}
       />
-      <Pagination className="pb-5">
-        <PaginationContent>
-          <PaginationItem onClick={handlePreviewsPage}>
-            <PaginationPrevious />
-          </PaginationItem>
-          {page !== 1 ? (
+      {data && data.length >= 50 ? (
+        <Pagination className="pb-5">
+          <PaginationContent>
             <PaginationItem onClick={handlePreviewsPage}>
-              <PaginationLink href="#">{page - 1}</PaginationLink>
+              <PaginationPrevious />
             </PaginationItem>
-          ) : (
-            ''
-          )}
-          <PaginationItem>
-            <PaginationLink href="#" isActive>
-              {page}
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem onClick={() => setPage(page + 1)}>
-            <PaginationLink href="#">{page + 1}</PaginationLink>
-          </PaginationItem>
-          <PaginationItem onClick={() => setPage(page + 1)}>
-            <PaginationNext />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+            {page !== 1 ? (
+              <PaginationItem onClick={handlePreviewsPage}>
+                <PaginationLink href="#">{page - 1}</PaginationLink>
+              </PaginationItem>
+            ) : (
+              ''
+            )}
+            <PaginationItem>
+              <PaginationLink href="#" isActive>
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem onClick={() => setPage(page + 1)}>
+              <PaginationLink href="#">{page + 1}</PaginationLink>
+            </PaginationItem>
+            <PaginationItem onClick={() => setPage(page + 1)}>
+              <PaginationNext />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      ) : null}
     </>
   )
 }

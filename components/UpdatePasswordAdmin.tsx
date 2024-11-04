@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
@@ -29,6 +30,8 @@ interface FormData {
 
 export function UpdatePasswordAdmin({ client }: Props) {
   const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -43,23 +46,32 @@ export function UpdatePasswordAdmin({ client }: Props) {
   const newPassword = watch('newPassword')
 
   async function handleChangePassword(data: FormData) {
-    setLoading(true)
-    await api.post('/api/change-password/', {
-      user_email: client?.email,
-      old_password: data.oldPassword,
-      new_password: data.newPassword,
-    })
-    await queryClient.refetchQueries(['getClients'])
-    toast.success('Senha alterada com sucesso!', {
-      position: 'bottom-right',
-      closeOnClick: true,
-      theme: 'dark',
-    })
-    setLoading(false)
+    try {
+      setLoading(true)
+      await api.post('/api/change-password/', {
+        user_email: client?.email,
+        old_password: data.oldPassword,
+        new_password: data.newPassword,
+      })
+      await queryClient.refetchQueries(['getClients'])
+      toast.success('Senha alterada com sucesso!', {
+        position: 'bottom-right',
+        closeOnClick: true,
+        theme: 'dark',
+      })
+      setLoading(false)
+      setOpen(false)
+    } catch (error: any) {
+      toast.error(error.response.data.detail, {
+        position: 'bottom-right',
+        theme: 'dark',
+        closeOnClick: true,
+      })
+    }
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={() => setOpen(!open)}>
       <DialogTrigger className="w-full">
         <Button
           className="flex w-full items-center justify-between px-2"
@@ -129,7 +141,7 @@ export function UpdatePasswordAdmin({ client }: Props) {
               </span>
             )}
           </div>
-          <div className="mt-6 flex justify-end gap-2">
+          <div className="mt-6 flex items-center justify-end gap-2">
             <DialogClose>
               <Button
                 className="flex items-center gap-1 rounded-xl px-3"

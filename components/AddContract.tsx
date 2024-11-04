@@ -134,7 +134,6 @@ export function AddContract({ client }: Props) {
       setLoading(false)
     } catch (err) {
       setLoading(false)
-      console.log(err)
     }
   }
   return (
