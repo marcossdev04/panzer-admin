@@ -65,6 +65,7 @@ export function AddStaff() {
       setLoading(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
+      console.log(err)
       setLoading(false)
       toast.error(
         err.response.data.email

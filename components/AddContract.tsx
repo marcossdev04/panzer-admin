@@ -10,7 +10,6 @@ import {
 import { Clients } from '@/types/Clients'
 import { api } from '@/api/api'
 import { useQuery } from 'react-query'
-import { Resources } from '@/types/Resources'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -39,6 +38,7 @@ import { DateRange } from 'react-day-picker'
 import { queryClient } from '@/api/QueryClient'
 import { toast } from 'react-toastify'
 import { Loader } from './Loader'
+import { Plan } from '@/types/Plans'
 
 interface Props {
   client: Clients | undefined
@@ -71,13 +71,11 @@ export function AddContract({ client }: Props) {
     resolver: zodResolver(FormSchema),
   })
   async function fetchResources() {
-    const response = await api.get('/api/contracts/resources-products/')
-    return response.data.results
+    const response = await api.get('/api/backoffice/plans/')
+    return response.data
   }
-  const { data: resources } = useQuery<Resources[]>(
-    ['getResources'],
-    fetchResources,
-  )
+  const { data: resources } = useQuery<Plan[]>(['getPlans'], fetchResources)
+  console.log(resources)
 
   function formatCurrency(value: number): string {
     return new Intl.NumberFormat('pt-BR', {
@@ -106,7 +104,8 @@ export function AddContract({ client }: Props) {
     { value: 'pix', label: 'Pix' },
   ]
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const formattedData = {
+    const formattedData =
+      /* {
       resources: data.resource,
       user: client?.id,
       comment: data.description,
@@ -120,10 +119,17 @@ export function AddContract({ client }: Props) {
           : nextMonth,
       payment_method: data.method_payment,
       value: value / 100,
-    }
+    } */
+      {
+        plan: data.resource,
+        user: client?.id,
+        status: 'active',
+        comment: data.description,
+        value: value / 100,
+      }
     try {
       setLoading(true)
-      await api.post('/api/contracts/create', formattedData)
+      await api.post('/api/backoffice/contracts/', formattedData)
       await queryClient.refetchQueries(['getClients'])
       setOpen(false)
       toast.success('Contrato adicionado com sucesso', {
@@ -133,6 +139,7 @@ export function AddContract({ client }: Props) {
       })
       setLoading(false)
     } catch (err) {
+      console.log(err)
       setLoading(false)
     }
   }
@@ -175,7 +182,7 @@ export function AddContract({ client }: Props) {
                       {resources?.map((resource, index) => {
                         return (
                           <SelectItem key={index} value={resource.id}>
-                            {resource.product_name}
+                            {resource.plan_name}
                           </SelectItem>
                         )
                       })}

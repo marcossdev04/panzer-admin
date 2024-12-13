@@ -48,10 +48,8 @@ export function UpdatePasswordAdmin({ client }: Props) {
   async function handleChangePassword(data: FormData) {
     try {
       setLoading(true)
-      await api.post('/api/change-password/', {
-        user_email: client?.email,
-        old_password: data.oldPassword,
-        new_password: data.newPassword,
+      await api.post(`/api/backoffice/users/${client?.id}/`, {
+        password: data.newPassword,
       })
       await queryClient.refetchQueries(['getClients'])
       toast.success('Senha alterada com sucesso!', {
@@ -62,11 +60,19 @@ export function UpdatePasswordAdmin({ client }: Props) {
       setLoading(false)
       setOpen(false)
     } catch (error: any) {
-      toast.error(error.response.data.detail, {
-        position: 'bottom-right',
-        theme: 'dark',
-        closeOnClick: true,
-      })
+      console.log(error)
+      setLoading(false)
+      error.response.status === 400
+        ? toast.error('Senha muito fraca', {
+            position: 'bottom-right',
+            theme: 'dark',
+            closeOnClick: true,
+          })
+        : toast.error('Erro insesperado na API', {
+            position: 'bottom-right',
+            theme: 'dark',
+            closeOnClick: true,
+          })
     }
   }
 
@@ -86,23 +92,6 @@ export function UpdatePasswordAdmin({ client }: Props) {
       <DialogContent className="max-w-[500px] mobile:max-w-[350px] mobile:rounded-xl tablet:rounded-2xl laptop:rounded-2xl desktop:rounded-2xl">
         <DialogTitle className="text-lime">Alterar senha</DialogTitle>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid w-full items-center gap-1.5">
-            <Label className="text-lime" htmlFor="newPassword">
-              Senha antiga
-            </Label>
-            <Input
-              type="password"
-              id="oldPassowrd"
-              {...register('oldPassword', {
-                required: 'A senha antiga é obrigatória',
-              })}
-              placeholder="Senha antiga"
-              className="focus-visible:ring-lime"
-            />
-            {errors.newPassword && (
-              <span className="text-red-500">{errors.newPassword.message}</span>
-            )}
-          </div>
           <div className="mt-4 grid w-full items-center gap-1.5">
             <Label className="text-lime" htmlFor="newPassword">
               Nova senha

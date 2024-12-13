@@ -7,12 +7,25 @@ import { useState } from 'react'
 import { api } from '@/api/api'
 import { queryClient } from '@/api/QueryClient'
 import { toast } from 'react-toastify'
-import { Form, FormField, FormItem, FormLabel, FormMessage } from './ui/form'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from './ui/form'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Loader } from './Loader'
 import { useForm } from 'react-hook-form'
-import { Switch } from './ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select'
 
 const FormSchema = z.object({
   plan_name: z.string({
@@ -29,7 +42,6 @@ const FormSchema = z.object({
   days: z.coerce
     .number({ required_error: 'digite o período do plano' })
     .min(1, { message: 'A duração deve ser pelo menos 1 dia' }),
-  hot: z.boolean().default(false),
 })
 
 export function AddPlan() {
@@ -39,12 +51,13 @@ export function AddPlan() {
     resolver: zodResolver(FormSchema),
   })
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log(data)
     const formattedData =
       data.resource && data.img_resource === ''
         ? {
             product: {
               product_name: data.product_name,
-              product_hot: data.hot,
+              product_hot: data.product_name === 'Panzer Pro hot',
             },
             plan_name: data.plan_name,
             plan_code: data.plan_code,
@@ -55,7 +68,7 @@ export function AddPlan() {
               product_name: data.product_name,
               resource: data.resource,
               img_resource: data.img_resource,
-              product_hot: data.hot,
+              product_hot: data.product_name === 'Panzer Pro hot',
             },
             plan_name: data.plan_name,
             plan_code: data.plan_code,
@@ -74,6 +87,7 @@ export function AddPlan() {
       setLoading(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
+      console.log(err)
       setLoading(false)
       toast.error(
         err.response.data.plan_code
@@ -113,20 +127,6 @@ export function AddPlan() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="w-full space-y-6 laptop:space-y-3"
           >
-            <FormField
-              control={form.control}
-              name="hot"
-              render={({ field }) => (
-                <FormItem className="mt-3 flex items-center gap-3 space-y-0">
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                  <div className="flex h-9 items-center text-xl">Plano hot</div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="plan_name"
@@ -189,12 +189,28 @@ export function AddPlan() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nome do Produto</FormLabel>
-                  <Input
-                    placeholder="Panzer Pro Mensal"
-                    className="placeholder:text-zinc-600"
-                    type="text"
-                    {...field}
-                  />
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o produto" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Panzer Novice">
+                        Panzer Novice
+                      </SelectItem>
+                      <SelectItem value="Panzer Corner">
+                        Panzer Corner
+                      </SelectItem>
+                      <SelectItem value="Panzer Pro">Panzer Pro</SelectItem>
+                      <SelectItem value="Panzer Pro Hot">
+                        Panzer Pro Hot
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

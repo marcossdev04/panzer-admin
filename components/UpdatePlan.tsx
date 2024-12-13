@@ -49,6 +49,7 @@ export function UpdatePlan({ plan }: Props) {
   })
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log(data)
     const formattedData =
       data.resource && data.img_resource === ''
         ? {
@@ -83,6 +84,7 @@ export function UpdatePlan({ plan }: Props) {
       })
       setLoading(false)
     } catch (err) {
+      console.log(err)
       setLoading(false)
       toast.error('Erro ao atualizar o plano', {
         position: 'bottom-right',

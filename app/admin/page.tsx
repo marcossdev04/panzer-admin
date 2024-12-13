@@ -12,7 +12,6 @@ import { Loader } from '@/components/Loader'
 import Image from 'next/image'
 import logo from '@/assets/HeaderLogo.png'
 
-// Definir a tipagem dos dados do formulário
 interface FormData {
   email: string
   password: string
